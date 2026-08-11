@@ -1,4 +1,4 @@
-from langchain.tools import tool
+from langchain_core.tools import tool
 from ..utils.http.client import get, post, APIError, APITimeoutError, APIConnectionError
 
 

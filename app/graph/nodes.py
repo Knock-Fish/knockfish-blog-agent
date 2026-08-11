@@ -5,7 +5,10 @@ LangGraph 节点定义模块
 from datetime import datetime
 
 from langgraph.graph import END
-from langgraph.prebuilt import ToolNode
+try:
+    from langgraph.prebuilt.tool_node import ToolNode
+except ImportError:
+    from langgraph.prebuilt import ToolNode
 
 from .state import AgentState
 from ..core.llm import llm  # 导入全局llm实例

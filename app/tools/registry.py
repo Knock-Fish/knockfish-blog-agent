@@ -1,5 +1,5 @@
 """工具注册中心：集中管理所有可供 agent 使用的工具"""
-from langchain.tools import BaseTool
+from langchain_core.tools import BaseTool
 
 from .springboot_api import (
     get_blog_post,
