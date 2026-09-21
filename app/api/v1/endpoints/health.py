@@ -1,5 +1,6 @@
 """健康检查接口"""
 from fastapi import APIRouter
+
 router = APIRouter()
 
 

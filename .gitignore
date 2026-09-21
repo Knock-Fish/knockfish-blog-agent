@@ -36,7 +36,7 @@ ENV/
 *.swp
 *.swo
 
-# SQLite 数据库（LangGraph 检查点数据，本地运行时自动生成）
+# 本地数据库文件（防止误提交本地运行时生成的库文件）
 data/
 *.db
 *.db-shm
@@ -53,3 +53,6 @@ htmlcov/
 
 # 调试文件
 test_main.http
+
+# WorkBuddy 本地工作记忆（含开发日志与架构讨论，不进公开仓库）
+.workbuddy/

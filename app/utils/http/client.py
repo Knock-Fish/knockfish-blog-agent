@@ -52,7 +52,7 @@ def _get_headers() -> dict:
     return headers
 
 
-# ========== 自定义异常 ==========
+# 自定义异常
 
 class APIError(Exception):
     """
@@ -208,9 +208,10 @@ async def _request(
     except asyncio.TimeoutError:
         raise APITimeoutError(408, f"请求超时 ({timeout_int}s)")
     except aiohttp.ClientConnectionError as e:
-        raise APIConnectionError(503, f"网络连接失败: {str(e)}")
+        # msg 保持纯原因描述，前缀（如「网络连接失败：」）由调用方按需添加，避免重复
+        raise APIConnectionError(503, str(e))
     except aiohttp.ClientError as e:
-        raise APIConnectionError(500, f"客户端错误: {str(e)}")
+        raise APIConnectionError(500, str(e))
 
 
 # ========== 对外暴露的便捷方法 ==========

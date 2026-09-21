@@ -1,11 +1,5 @@
-"""全局配置（Pydantic Settings 自动读取 .env）
+"""全局配置（Pydantic Settings 自动读取 .env）"""
 
-职责：
-- 单一真相源：所有环境变量 / 配置项集中在此声明
-- 类型安全：启动时校验，配置缺项直接崩溃（Fail Fast）
-- 关注点分离：本模块仅负责"读配置"，不负责创建 LLM/Graph 等对象
-"""
-from typing import List
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -28,22 +22,6 @@ class Settings(BaseSettings):
     APP_PORT: int = Field(default=8000)
     APP_RELOAD: bool = Field(default=True, description="uvicorn 热重载（仅开发环境启用）")
 
-    # 日志
-    LOG_LEVEL: str = Field(default="INFO", description="日志级别: DEBUG/INFO/WARNING/ERROR")
-    LOG_FORMAT: str = Field(
-        default="%(asctime)s | %(levelname)-7s | %(name)s | %(message)s",
-        description="标准 logging 格式",
-    )
-
-    # CORS
-    CORS_ALLOW_ORIGINS: List[str] = Field(
-        default_factory=lambda: ["*"],
-        description="CORS 允许来源列表，默认放行所有",
-    )
-    CORS_ALLOW_CREDENTIALS: bool = Field(default=True)
-    CORS_ALLOW_METHODS: List[str] = Field(default_factory=lambda: ["*"])
-    CORS_ALLOW_HEADERS: List[str] = Field(default_factory=lambda: ["*"])
-
     # LLM
     LLM_API_KEY: str
     LLM_BASE_URL: str
@@ -55,9 +33,33 @@ class Settings(BaseSettings):
     HTTP_BASE_URL: str
     HTTP_TIMEOUT: int = Field(default=30, description="HTTP 请求超时秒数")
 
-    # ---- LangGraph / 会话 ----
-    # 是否启用 LangSmith 追踪（默认关，需要设置 LANGCHAIN_API_KEY 时开启）
-    LANGSMITH_TRACING: bool = Field(default=False)
+    # Database
+    # 连接串内含数据库账号密码，必须由 .env 提供；代码里不保留任何默认值
+    DATABASE_URL: str = Field(
+        description="PostgreSQL 异步连接串（业务表 + LangGraph 检查点共用），"
+        "格式：postgresql+asyncpg://user:password@host:5432/dbname",
+    )
+
+    # JWT（验证 Spring Boot 签发的 RS256 token）
+    JWT_ALGORITHM: str = Field(default="RS256", description="JWT 验签算法，须与 Spring Boot 一致")
+    JWT_ISSUER: str | None = Field(default=None, description="可选：校验 token 签发方(iss)，不填则不校验")
+
+    # CORS（默认仅放行本地开发端口；生产域名请通过环境变量 CORS_ALLOW_ORIGINS 覆盖，勿写入代码）
+    CORS_ALLOW_ORIGINS: list[str] = Field(
+        default=[
+            "http://localhost:5173",
+            "http://localhost:8081",
+            "http://localhost:8000",
+        ],
+        description="显式允许的前端源白名单（默认仅本地开发端口）",
+    )
+    CORS_ALLOW_ORIGIN_REGEX: str = Field(
+        default=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+        description="兜底正则：放行所有 localhost / 127.0.0.1 任意端口（开发环境）",
+    )
+    CORS_ALLOW_CREDENTIALS: bool = Field(
+        default=True, description="是否允许携带凭据（Authorization/Cookie）；启用后不能用通配符源"
+    )
 
 
 """一个缓存的 Settings 实例，确保配置只被加载一次。"""
